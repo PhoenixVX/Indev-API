@@ -32,7 +32,6 @@ dependencies {
     modImplementation "com.github.Cursed-Ancient-Fabric:preclassic-loader:b6f179763d"
 
     // Some dependencies aren't gotten by the loader, so we add them ourselves
-    implementation 'com.github.Cursed-Ancient-Fabric:preclassic-tiny-remapper:421c900'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.8.1'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.8.1'
     implementation 'com.google.guava:guava:28.0-jre'
@@ -46,28 +45,9 @@ dependencies {
     annotationProcessor group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.8.1'
 }
 
-
-tasks.remapJar.RemapOptions {
-    it.ignoreConflicts()
-}
-
-configurations.all {
-    resolutionStrategy {
-        dependencySubstitution {
-            substitute module('org.lwjgl.lwjgl:lwjgl_util:2.9.1-nightly-20130708-debug3') with module('org.lwjgl.lwjgl:lwjgl_util:2.9.4-nightly-20150209') 
-            substitute module('org.lwjgl.lwjgl:lwjgl:2.9.1-nightly-20130708-debug3') with module('org.lwjgl.lwjgl:lwjgl:2.9.4-nightly-20150209')
-            substitute module('net.java.jinput:jinput:2.0.5') with module('net.java.jinput:jinput:2.0.9')
-            substitute module('net.fabricmc:tiny-remapper:0.3.1.72') with module('com.github.Cursed-Ancient-Fabric:preclassic-tiny-remapper:421c900')
-        }
-        force 'org.lwjgl.lwjgl:lwjgl-platform:2.9.4-nightly-20150209'
-        force 'net.java.jinput:jinput:2.0.9'
-        force 'com.github.Cursed-Ancient-Fabric:preclassic-tiny-remapper:421c900'
-    }
-}
-
 minecraft {
     intermediaryUrl = {
-        return "https://panel.repsy.io/mvn/xxx_inaksis_xxx/indevmc/net/fabricmc/intermediary/in-20091223-2-intermediary/intermediary-in-20091223-2-intermediary-v2.jar"
+        return "https://github.com/PhoenixVX/trashcan/blob/main/intermediary-in-20091223-2-intermediary-v2.jar?raw=true"
     }
     customManifest = "https://gist.githubusercontent.com/PhoenixVX/6ac7be22aa753f3b6f86b6f4b5e0ae0a/raw/59ec0d10f600057950d341a8c613d40cbab72c2f/in-20091223-2-manifest.json"
 

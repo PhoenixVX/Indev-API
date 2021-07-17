@@ -1,6 +1,5 @@
 pluginManagement {
     repositories {
-        jcenter()
         maven {
             name = "concern"
             url = "https://maven.concern.i.ng/"
