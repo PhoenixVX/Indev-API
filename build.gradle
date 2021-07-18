@@ -27,7 +27,7 @@ repositories {
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
 
-    mappings "net.textilemc:yarrn:in-20091223-2+build21d197:v2"
+    mappings "net.textilemc:yarrn:in-20091223-2+build21d199:v2"
 
     modImplementation "com.github.Cursed-Ancient-Fabric:preclassic-loader:b6f179763d"
 
