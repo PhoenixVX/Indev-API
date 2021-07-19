@@ -1,79 +1,122 @@
 plugins {
-    id 'textile-loom' version '0.5.1+build12'
+    id 'textile-loom' version '0.5.1+build12' apply false
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
-
-archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
-repositories {
-    maven {
-        name = "Jitpack"
-        url "https://jitpack.io/"
+allprojects {
+    apply plugin: "textile-loom"
+
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    archivesBaseName = project.archives_base_name
+
+    tasks.withType(JavaCompile).configureEach {
+        it.options.encoding = "UTF-8"
     }
-    maven {
-        name = "Concerning"
-        url "https://maven.concern.i.ng/"
+
+    group = "net.textilemc.indev-api"
+
+    repositories {
+        maven { url "https://jitpack.io/" }
+        maven { url "https://maven.concern.i.ng/" }
+        maven { url "https://panel.repsy.io/mvn/xxx_inaksis_xxx/indevmc/" }
     }
-    maven {
-        name = "IndevMC"
-        url "https://panel.repsy.io/mvn/xxx_inaksis_xxx/indevmc/"
+
+    dependencies {
+        minecraft "com.mojang:minecraft:${project.minecraft_version}"
+        mappings "net.textilemc:yarrn:in-20091223-2+build21d199:v2"
+        modImplementation "com.github.Cursed-Ancient-Fabric:preclassic-loader:b6f179763d"
+
+        // Some dependencies aren't gotten by the loader, so we add them ourselves
+        implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.8.1'
+        implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.8.1'
+        implementation 'com.google.guava:guava:28.0-jre'
+        implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
+        implementation 'org.ow2.asm:asm:9.0'
+        implementation 'org.ow2.asm:asm-analysis:9.0'
+        implementation 'org.ow2.asm:asm-commons:9.0'
+        implementation 'org.ow2.asm:asm-tree:9.0'
+        implementation 'org.ow2.asm:asm-util:9.0'
+        annotationProcessor group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.8.1'
+        annotationProcessor group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.8.1'
+    }
+
+    minecraft {
+        intermediaryUrl = {
+            return "https://github.com/PhoenixVX/trashcan/blob/main/intermediary-in-20091223-2-intermediary-v2.jar?raw=true"
+        }
+        customManifest = "https://gist.githubusercontent.com/PhoenixVX/6ac7be22aa753f3b6f86b6f4b5e0ae0a/raw/59ec0d10f600057950d341a8c613d40cbab72c2f/in-20091223-2-manifest.json"
+
+        clientOnly = true
+    }
+
+    jar {
+        archiveClassifier = "dev"
+    }
+
+    afterEvaluate {
+        remapJar {
+            input = file("${project.buildDir}/libs/$archivesBaseName-$version-dev.jar")
+            archiveName = "${archivesBaseName}-${version}.jar"
+        }
+
+        processResources {
+            inputs.property "version", project.version
+
+            filesMatching("fabric.mod.json") {
+                expand "version": project.version
+            }
+        }
+    }
+
+    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+    // if it is present.
+    // If you remove this task, sources will not be generated.
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = "sources"
+        from sourceSets.main.allSource
+    }
+
+}
+
+subprojects {
+    dependencies {
+        modImplementation sourceSets.main.output
+    }
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId 'net.textilemc'
+                artifactId "indev-api"
+                version ${project.mod_version}
+            }
+
+        }
+        repositories {
+            if (project.hasProperty("repsyUsername")) {
+                maven {
+                    // change to point to your repo, e.g. http://my.org/repo
+                    url 'https://panel.repsy.io/mvn/xxx_inaksis_xxx/indevmc/'
+                    credentials {
+                        username repsyUsername
+                        password repsyPassword
+                    }
+                }
+            }
+        }
     }
 }
 
 dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    afterEvaluate {
+        subprojects.each {
+            api project(path: ":${it.name}", configuration: "dev")
+            include project("${it.name}:")
 
-    mappings "net.textilemc:yarrn:in-20091223-2+build21d199:v2"
-
-    modImplementation "com.github.Cursed-Ancient-Fabric:preclassic-loader:b6f179763d"
-
-    // Some dependencies aren't gotten by the loader, so we add them ourselves
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.8.1'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.8.1'
-    implementation 'com.google.guava:guava:28.0-jre'
-    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
-    implementation 'org.ow2.asm:asm:9.0'
-    implementation 'org.ow2.asm:asm-analysis:9.0'
-    implementation 'org.ow2.asm:asm-commons:9.0'
-    implementation 'org.ow2.asm:asm-tree:9.0'
-    implementation 'org.ow2.asm:asm-util:9.0'
-    annotationProcessor group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.8.1'
-    annotationProcessor group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.8.1'
-}
-
-minecraft {
-    intermediaryUrl = {
-        return "https://github.com/PhoenixVX/trashcan/blob/main/intermediary-in-20091223-2-intermediary-v2.jar?raw=true"
+            modImplementation project("${it.name}:").sourceSets.testmod.output
+        }
     }
-    customManifest = "https://gist.githubusercontent.com/PhoenixVX/6ac7be22aa753f3b6f86b6f4b5e0ae0a/raw/59ec0d10f600057950d341a8c613d40cbab72c2f/in-20091223-2-manifest.json"
-
-    clientOnly = true
-}
-
-processResources {
-    inputs.property "version", project.version
-
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version
-    }
-}
-
-
-// ensure that the encoding is set to UTF-8, no matter what the system default is
-// this fixes some edge cases with special characters not displaying correctly
-// see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
-tasks.withType(JavaCompile) {
-    options.encoding = "UTF-8"
-}
-
-// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-// if it is present.
-// If you remove this task, sources will not be generated.
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = "sources"
-    from sourceSets.main.allSource
 }
